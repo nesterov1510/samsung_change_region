@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="3.5.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.5.1" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.4" PrivateAssets="all" />
     <ProjectReference Include="../RegionConsole/RegionConsole.csproj" />
   </ItemGroup>
 

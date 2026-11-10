@@ -13,10 +13,18 @@ jobs:
 
     steps:
       - name: Checkout репозитория
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
+
+      - name: Установка .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Восстановление пакетов NuGet
+        run: dotnet restore RegionConsole.sln
 
       - name: Сборка решения (Release, .NET Framework 4.7.2)
-        run: dotnet build RegionConsole.sln -c Release --nologo
+        run: dotnet build RegionConsole.sln -c Release --nologo -v:detailed
 
       - name: Запуск автотестов
         run: dotnet test RegionConsole.sln -c Release --no-build --nologo
