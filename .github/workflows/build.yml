@@ -52,11 +52,23 @@ jobs:
       - name: Запуск автотестов
         run: dotnet test RegionConsole.sln -c Release --no-build --nologo
 
+      - name: Найти и подготовить .exe для артефакта
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path "RegionConsole/bin/Release" -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $exe) {
+            Write-Error "RegionConsole.exe не найден в RegionConsole/bin/Release"
+            Get-ChildItem -Path "RegionConsole/bin/Release" -Recurse | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+            exit 1
+          }
+          Write-Host "Найден .exe: $($exe.FullName)"
+          Copy-Item $exe.FullName -Destination "RegionConsole.exe" -Force
+
       - name: Публикация артефакта .exe
         uses: actions/upload-artifact@v4
         with:
           name: RegionConsole.exe
-          path: RegionConsole/bin/Release/**/RegionConsole.exe
+          path: RegionConsole.exe
           if-no-files-found: error
 
       - name: Упаковка архива исходного кода
