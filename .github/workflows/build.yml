@@ -1,0 +1,39 @@
+name: Build Region Console
+
+on:
+  push:
+    branches: [main, "arena/**"]
+  pull_request:
+    branches: [main, "arena/**"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout репозитория
+        uses: actions/checkout@v4
+
+      - name: Сборка решения (Release, .NET Framework 4.7.2)
+        run: dotnet build RegionConsole.sln -c Release --nologo
+
+      - name: Запуск автотестов
+        run: dotnet test RegionConsole.sln -c Release --no-build --nologo
+
+      - name: Публикация артефакта .exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: RegionConsole.exe
+          path: RegionConsole/bin/Release/RegionConsole.exe
+          if-no-files-found: error
+
+      - name: Упаковка архива исходного кода
+        shell: pwsh
+        run: Compress-Archive -Path * -DestinationPath RegionConsole-source.zip -Exclude @(".git", "bin", "obj", ".vs", "*.zip") -Force
+
+      - name: Публикация архива исходного кода
+        uses: actions/upload-artifact@v4
+        with:
+          name: RegionConsole-source
+          path: RegionConsole-source.zip
