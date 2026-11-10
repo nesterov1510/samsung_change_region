@@ -23,10 +23,16 @@ jobs:
       - name: Восстановление пакетов NuGet
         run: dotnet restore RegionConsole.sln
 
-      - name: Публикация основного проекта (Release, .NET Framework 4.7.2)
+      - name: Сборка основного проекта (Release, .NET Framework 4.7.2)
         shell: pwsh
         continue-on-error: true
-        run: dotnet publish RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -o "${{ github.workspace }}/publish" 2>&1 | Tee-Object -FilePath build-main.log
+        run: |
+          $outDir = "${{ github.workspace }}/bin/out"
+          dotnet build RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -p:OutDir="$outDir/" 2>&1 | Tee-Object -FilePath build-main.log
+          Write-Host "=== Выходной каталог: $outDir ==="
+          Get-ChildItem -Path "$outDir" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_.FullName }
+          Write-Host "=== Все .exe в репозитории ==="
+          Get-ChildItem -Path "." -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
 
       - name: Загрузка лога сборки основного проекта
         if: always()
@@ -55,13 +61,13 @@ jobs:
       - name: Найти и подготовить .exe для артефакта
         shell: pwsh
         run: |
-          Write-Host "=== Содержимое publish/ ==="
-          Get-ChildItem -Path "publish" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_.FullName }
-          $exe = Get-ChildItem -Path "publish" -Filter "RegionConsole.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $outDir = "${{ github.workspace }}/bin/out"
+          $exe = Get-ChildItem -Path "$outDir" -Filter "RegionConsole.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $exe) {
-            Write-Error "RegionConsole.exe не найден в publish/"
-            Write-Host "=== Поиск по всему репозиторию ==="
-            Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
+            $exe = Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          }
+          if (-not $exe) {
+            Write-Error "RegionConsole.exe не найден"
             exit 1
           }
           Write-Host "Найден .exe: $($exe.FullName)"
