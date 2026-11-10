@@ -4,7 +4,6 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyName>RegionConsole</AssemblyName>
     <RootNamespace>RegionConsole</RootNamespace>
@@ -37,7 +36,7 @@
     <Compile Include="TerminalEngine.cs" />
     <Compile Include="Netsh.cs" />
     <Compile Include="IcsManager.cs" />
-    <EmbeddedResource Include="Resources\region_console.ico" />
+    <None Include="Resources\region_console.ico" />
     <Content Include="Resources\icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
