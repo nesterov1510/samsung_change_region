@@ -23,10 +23,10 @@ jobs:
       - name: Восстановление пакетов NuGet
         run: dotnet restore RegionConsole.sln
 
-      - name: Сборка основного проекта (Release, .NET Framework 4.7.2)
+      - name: Публикация основного проекта (Release, .NET Framework 4.7.2)
         shell: pwsh
         continue-on-error: true
-        run: dotnet build RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed 2>&1 | Tee-Object -FilePath build-main.log
+        run: dotnet publish RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -o ./publish 2>&1 | Tee-Object -FilePath build-main.log
 
       - name: Загрузка лога сборки основного проекта
         if: always()
@@ -55,12 +55,13 @@ jobs:
       - name: Найти и подготовить .exe для артефакта
         shell: pwsh
         run: |
-          Write-Host "=== Поиск RegionConsole.exe по всему репозиторию ==="
-          $exe = Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          Write-Host "=== Содержимое publish/ ==="
+          Get-ChildItem -Path "publish" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_.FullName }
+          $exe = Get-ChildItem -Path "publish" -Filter "RegionConsole.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $exe) {
-            Write-Error "RegionConsole.exe НЕ найден нигде в репозитории"
-            Write-Host "=== Содержимое RegionConsole/bin ==="
-            Get-ChildItem -Path "RegionConsole/bin" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { Write-Host $_.FullName }
+            Write-Error "RegionConsole.exe не найден в publish/"
+            Write-Host "=== Поиск по всему репозиторию ==="
+            Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
             exit 1
           }
           Write-Host "Найден .exe: $($exe.FullName)"
