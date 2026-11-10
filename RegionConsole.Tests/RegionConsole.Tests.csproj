@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <Nullable>disable</Nullable>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
@@ -9,8 +9,7 @@
   <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="3.5.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.5.1" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
-    <ProjectReference Include="../RegionConsole/RegionConsole.csproj" />
+        <ProjectReference Include="../RegionConsole/RegionConsole.csproj" />
   </ItemGroup>
 
 </Project>

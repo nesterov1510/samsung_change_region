@@ -23,16 +23,10 @@ jobs:
       - name: Восстановление пакетов NuGet
         run: dotnet restore RegionConsole.sln
 
-      - name: Сборка основного проекта (Release, .NET Framework 4.7.2)
+      - name: Сборка основного проекта (Release, .NET Framework 4.8)
         shell: pwsh
         continue-on-error: true
-        run: |
-          $outDir = "${{ github.workspace }}/bin/out"
-          dotnet build RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -p:OutDir="$outDir/" 2>&1 | Tee-Object -FilePath build-main.log
-          Write-Host "=== Выходной каталог: $outDir ==="
-          Get-ChildItem -Path "$outDir" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_.FullName }
-          Write-Host "=== Все .exe в репозитории ==="
-          Get-ChildItem -Path "." -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10 | ForEach-Object { Write-Host $_.FullName }
+        run: dotnet build RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed 2>&1 | Tee-Object -FilePath build-main.log
 
       - name: Загрузка лога сборки основного проекта
         if: always()
@@ -42,7 +36,7 @@ jobs:
           path: build-main.log
           if-no-files-found: ignore
 
-      - name: Сборка тестового проекта (Release, .NET Framework 4.7.2)
+      - name: Сборка тестового проекта (Release, .NET Framework 4.8)
         shell: pwsh
         continue-on-error: true
         run: dotnet build RegionConsole.Tests/RegionConsole.Tests.csproj -c Release --nologo -v:detailed 2>&1 | Tee-Object -FilePath build-tests.log
@@ -61,13 +55,14 @@ jobs:
       - name: Найти и подготовить .exe для артефакта
         shell: pwsh
         run: |
-          $outDir = "${{ github.workspace }}/bin/out"
-          $exe = Get-ChildItem -Path "$outDir" -Filter "RegionConsole.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $exe) {
-            $exe = Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          }
+          Write-Host "=== Все .exe в репозитории ==="
+          $exes = Get-ChildItem -Path "." -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 10
+          if ($exes) { $exes | ForEach-Object { Write-Host $_.FullName } }
+          $exe = Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $exe) {
             Write-Error "RegionConsole.exe не найден"
+            Write-Host "=== Содержимое RegionConsole/bin ==="
+            Get-ChildItem -Path "RegionConsole/bin" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { Write-Host $_.FullName }
             exit 1
           }
           Write-Host "Найден .exe: $($exe.FullName)"
