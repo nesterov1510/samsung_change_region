@@ -55,10 +55,12 @@ jobs:
       - name: Найти и подготовить .exe для артефакта
         shell: pwsh
         run: |
-          $exe = Get-ChildItem -Path "RegionConsole/bin/Release" -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          Write-Host "=== Поиск RegionConsole.exe по всему репозиторию ==="
+          $exe = Get-ChildItem -Path "." -Filter "RegionConsole.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $exe) {
-            Write-Error "RegionConsole.exe не найден в RegionConsole/bin/Release"
-            Get-ChildItem -Path "RegionConsole/bin/Release" -Recurse | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+            Write-Error "RegionConsole.exe НЕ найден нигде в репозитории"
+            Write-Host "=== Содержимое RegionConsole/bin ==="
+            Get-ChildItem -Path "RegionConsole/bin" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { Write-Host $_.FullName }
             exit 1
           }
           Write-Host "Найден .exe: $($exe.FullName)"
