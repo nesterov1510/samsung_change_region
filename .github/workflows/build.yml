@@ -23,17 +23,31 @@ jobs:
       - name: Восстановление пакетов NuGet
         run: dotnet restore RegionConsole.sln
 
-      - name: Сборка решения (Release, .NET Framework 4.7.2) через MSBuild
+      - name: Сборка основного проекта (Release, .NET Framework 4.7.2)
         shell: pwsh
-        run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find MSBuild\Current\Bin\msbuild.exe
-          if (-not $msbuild) {
-            Write-Error "MSBuild не найден через vswhere"
-            exit 1
-          }
-          Write-Host "Используется MSBuild: $msbuild"
-          & $msbuild RegionConsole.sln /p:Configuration=Release /p:Platform="Any CPU" /v:detailed /nologo
+        continue-on-error: true
+        run: dotnet build RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed 2>&1 | Tee-Object -FilePath build-main.log
+
+      - name: Загрузка лога сборки основного проекта
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-main-log
+          path: build-main.log
+          if-no-files-found: ignore
+
+      - name: Сборка тестового проекта (Release, .NET Framework 4.7.2)
+        shell: pwsh
+        continue-on-error: true
+        run: dotnet build RegionConsole.Tests/RegionConsole.Tests.csproj -c Release --nologo -v:detailed 2>&1 | Tee-Object -FilePath build-tests.log
+
+      - name: Загрузка лога сборки тестов
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-tests-log
+          path: build-tests.log
+          if-no-files-found: ignore
 
       - name: Запуск автотестов
         run: dotnet test RegionConsole.sln -c Release --no-build --nologo
