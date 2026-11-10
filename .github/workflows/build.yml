@@ -26,7 +26,7 @@ jobs:
       - name: Публикация основного проекта (Release, .NET Framework 4.7.2)
         shell: pwsh
         continue-on-error: true
-        run: dotnet publish RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -o ./publish 2>&1 | Tee-Object -FilePath build-main.log
+        run: dotnet publish RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -o "${{ github.workspace }}/publish" 2>&1 | Tee-Object -FilePath build-main.log
 
       - name: Загрузка лога сборки основного проекта
         if: always()
