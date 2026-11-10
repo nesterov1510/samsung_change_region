@@ -27,7 +27,7 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
-          dotnet msbuild RegionConsole/RegionConsole.csproj /p:Configuration=Release /p:Platform="Any CPU" /p:OutDir="${{ github.workspace }}/bin/out" /v:detailed /nologo 2>&1 | Tee-Object -FilePath build-main.log
+          dotnet build RegionConsole/RegionConsole.csproj -c Release --nologo -v:detailed -p:OutDir="${{ github.workspace }}/bin/out" -p:OutputType=WinExe 2>&1 | Tee-Object -FilePath build-main.log
           Write-Host "=== bin/out содержимое ==="
           Get-ChildItem -Path "${{ github.workspace }}/bin/out" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_.FullName }
 
@@ -39,13 +39,10 @@ jobs:
           path: build-main.log
           if-no-files-found: ignore
 
-      - name: Сборка тестового проекта (Release, .NET Framework 4.8) через MSBuild
+      - name: Сборка тестового проекта (Release, .NET Framework 4.8)
         shell: pwsh
         continue-on-error: true
-        run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find MSBuild\Current\Bin\msbuild.exe
-          & $msbuild RegionConsole.Tests/RegionConsole.Tests.csproj /p:Configuration=Release /p:Platform="Any CPU" /v:detailed /nologo 2>&1 | Tee-Object -FilePath build-tests.log
+        run: dotnet build RegionConsole.Tests/RegionConsole.Tests.csproj -c Release --nologo -v:detailed -p:OutDir="${{ github.workspace }}/bin/tests-out" 2>&1 | Tee-Object -FilePath build-tests.log
 
       - name: Загрузка лога сборки тестов
         if: always()
