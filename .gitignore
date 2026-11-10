@@ -1,0 +1,21 @@
+# Visual Studio / .NET Framework
+[Dd]ebug/
+[Rr]elease/
+x64/
+build/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.vs
+.vs/
+*.nupkg
+*.nuspec
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# Local builds
+RegionConsole-source.zip
